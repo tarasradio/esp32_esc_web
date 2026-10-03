@@ -19,6 +19,10 @@
 #define US_MIN       1376   // полный назад
 #define US_MAX       1600   // полный вперёд
 
+// Границы скоростей для спиннера
+#define SPINNER_US_MIN 1200   // полный назад
+#define SPINNER_US_MAX 1800   // полный вперёд
+
 // ==================== FAILSAFE ====================
 const unsigned long FAILSAFE_TIMEOUT_MS = 500;
 unsigned long lastClientPacketTime = 0;
@@ -250,11 +254,18 @@ document.getElementById('btnStop').addEventListener('click', () => {
 )rawliteral";
 
 // ==================== ПРЕОБРАЗОВАНИЕ ====================
-int axisToUs(float v) {
+int axisToUsWheels(float v) {
   if (v > 1) v = 1;
   if (v < -1) v = -1;
   if (v >= 0) return (int)(US_STOP + v * (US_MAX - US_STOP));
   else        return (int)(US_STOP + v * (US_STOP - US_MIN));
+}
+
+int axisToUsSpinner(float v) {
+  if (v > 1) v = 1;
+  if (v < -1) v = -1;
+  if (v >= 0) return (int)(US_STOP + v * (SPINNER_US_MAX - US_STOP));
+  else        return (int)(US_STOP + v * (US_STOP - SPINNER_US_MIN));
 }
 
 // ==================== ОБРАБОТЧИКИ ====================
@@ -285,12 +296,12 @@ void handleCmd() {
       right = -right;
     #endif
 
-    targetL = axisToUs(left);
-    targetR = axisToUs(right);
+    targetL = axisToUsWheels(left);
+    targetR = axisToUsWheels(right);
   }
 
   if (server.hasArg("s")) {
-    targetS = axisToUs(server.arg("s").toFloat());
+    targetS = axisToUsSpinner(server.arg("s").toFloat());
   }
 
   lastClientPacketTime = millis();
